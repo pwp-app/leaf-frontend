@@ -6,7 +6,12 @@
                     <div class="form-title">
                         <span>登录</span>
                     </div>
-                    <el-form :model="loginForm" :rules="loginFormRules">
+                    <el-form
+                        ref="loginForm"
+                        class="portal-form"
+                        :model="loginForm"
+                        :rules="loginFormRules"
+                    >
                         <el-form-item prop="username">
                             <el-input class="input-dark" v-model="loginForm.username" placeholder="用户名"></el-input>
                         </el-form-item>
@@ -46,8 +51,6 @@
                             class="portal-form"
                             :model="registerForm"
                             :rules="registerFormRules"
-                            label-position="top"
-                            label-width="80px"
                         >
                             <el-form-item prop="username">
                                 <el-input class="input-dark" v-model="registerForm.username" placeholder="用户名"></el-input>
@@ -223,21 +226,86 @@ export default {
     methods: {
         toLogin() {
             this.formStatus = 'login'
+            this.clearLogin()
         },
         toRegister() {
             this.formStatus =  'register'
+            this.clearRegister()
+        },
+        clearLogin(){
+            this.loginForm.username = ''
+            this.loginForm.password = ''
+        },
+        clearRegister(){
+            this.registerForm.username = ''
+            this.registerForm.password = ''
+            this.registerForm.confirmPassword = ''
+            this.registerForm.inviteCode = ''
         },
         onLogin(){
-
+            this.$refs['loginForm'].validate((valid) => {
+                if (!valid) {
+                    return false;
+                }
+                try {
+                    this.executeRecaptcha()
+                } catch {
+                    this.$message.error('验证加载失败')
+                }
+            });
         },
         onRegister(){
-
+            this.$refs['registerForm'].validate((valid) => {
+                if (!valid) {
+                    return false;
+                }
+                try {
+                    this.executeRecaptcha()
+                } catch {
+                    this.$message.error('验证加载失败')
+                }
+            });
         },
-        submitRequest(){
+        submitRequest(token){
             if (this.formStatus == 'login'){
-
+                this.axios.post('/api/portal/login', {
+                    username: this.loginForm.username,
+                    password: this.loginForm.password,
+                    recaptchaToken: token,
+                    rememberMe: this.loginForm.rememberMe
+                }).then((response) => {
+                    if (response.status != 200){
+                        this.$message.error('请求时出现错误');
+                        return;
+                    }
+                    if (response.data.code != 200){
+                        this.$message.error(response.data.message);
+                        return;
+                    } else {
+                        this.$router.push({
+                            name: 'app.apps'
+                        })
+                    }
+                })
             } else if (this.formStatus == 'register') {
-
+                this.axios.post('/api/portal/register', {
+                    username: this.registerForm.username,
+                    password: this.registerForm.password,
+                    confirmPassword: this.registerForm.confirmPassword,
+                    recaptchaToken: token
+                }).then((response)=>{
+                    if (response.status != 200){
+                        this.$message.error('请求时出现错误');
+                        return;
+                    }
+                    if (response.data.code != 200){
+                        this.$message.error(response.data.message);
+                        return;
+                    } else {
+                        this.$message.success('注册成功')
+                        this.formStatus = 'login'
+                        }
+                });
             }
         },
         // execute the recaptcha widget
@@ -300,6 +368,9 @@ export default {
 }
 </style>
 <style lang="less">
+.recaptcha {
+    display: none;
+}
 .input-dark > input {
     background-color: #1e1e1e;
     border-color: #6a6a6a;
