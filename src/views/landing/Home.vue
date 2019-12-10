@@ -65,12 +65,12 @@ export default {
 
 <style lang="less" scoped>
 .home-main {
-    background: #1e1e1e;
+    background: rgba(250,251,252);
     user-select: none;
     -webkit-user-drag: none;
 }
 .home-footer{
-    background: #1e1e1e;
+    background: rgba(250,251,252);
     user-select: none;
     -webkit-user-drag: none;
 }
@@ -106,21 +106,6 @@ export default {
 .row-action{
     text-align: center;
     margin-top: 4.75rem;
-}
-.btn-dark{
-    font-weight: 600;
-    color: #1e1e1e;
-    letter-spacing: 0.05em;
-}
-.btn-dark:hover{
-    background-color: darken(#3e885b, 5%);
-    border-color: darken(#3e885b, 5%);
-    color: #2e2e2e;
-}
-.btn-dark:focus{
-    color: #1e1e1e;
-    background-color: darken(#3e885b, 10%);
-    border-color: darken(#3e885b, 10%);
 }
 </style>
 

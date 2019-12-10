@@ -30,11 +30,25 @@ export default {
             portalBackground: 'https://img.backrunner.top/leaf/portal-bg.jpg'
         }
     },
+    mounted(){
+        this.checkLoginStatus()
+    },
     methods: {
         toHome(){
             this.$router.push({
                 name: 'landing.home'
             })
+        },
+        checkLoginStatus() {
+            this.axios.get("/api/portal/check").then((response) => {
+                if (response.status == 200) {
+                    if (response.data.code == 200) {
+                        this.$router.push({
+                            name: "app.main.myapps"
+                        });
+                    }
+                }
+            });
         }
     }
 }
@@ -66,7 +80,7 @@ export default {
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.75) 25%, rgba(0, 0, 0, 0.925) 37.5%, rgba(0, 0, 0, 0.925) 62.5%, rgba(0, 0, 0, 0.75) 75%, rgba(0, 0, 0, 0.5) 100%);
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.5) 25%, rgba(0, 0, 0, 0.75) 37.5%, rgba(0, 0, 0, 0.75) 62.5%, rgba(0, 0, 0, 0.5) 75%, rgba(0, 0, 0, 0.25) 100%);
 }
 .portal-form {
     margin: 14rem auto 7.5rem auto;
@@ -74,11 +88,15 @@ export default {
 .portal-back{
     text-align: center;
     font-size: 14px;
-    color: #4a4a4a;
+    color: #aeaeae;
     transition: 200ms;
 }
 .portal-back:hover{
-    color: #6a6a6a;
+    color: #8a8a8a;
+    cursor: pointer;
+}
+.portal-back:focus{
+    color: #606266;
     cursor: pointer;
 }
 @keyframes fadeIn {

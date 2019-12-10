@@ -283,7 +283,7 @@ export default {
                         return;
                     } else {
                         this.$router.push({
-                            name: 'app.apps'
+                            name: 'app.main.myapps'
                         })
                     }
                 })
@@ -336,35 +336,14 @@ export default {
 .form-footer-btn {
     width: 48.75%;
 }
-.btn-dark{
-    font-weight: 600;
-    color: #1e1e1e;
-    letter-spacing: 0.05em;
-}
-.btn-dark:hover{
-    background-color: darken(#3e885b, 5%);
-    border-color: darken(#3e885b, 5%);
-    color: #2e2e2e;
-}
-.btn-dark:focus{
-    color: #1e1e1e;
-    background-color: darken(#3e885b, 10%);
-    border-color: darken(#3e885b, 10%);
-}
 .btn-dark-secondary{
     font-weight: 600;
-    color: #1e1e1e;
-    background: #8f8f8f;
+    background: #dedede;
     border: #9a9a9a;
     letter-spacing: 0.05em;
 }
 .btn-dark-secondary:hover{
-    background-color: #6a6a6a;
-    color: #2e2e2e;
-}
-.btn-dark-secondary:focus{
-    background-color: #4a4a4a;
-    color: #1e1e1e;
+    background: #eaeaea;
 }
 </style>
 <style lang="less">
@@ -372,9 +351,9 @@ export default {
     display: none;
 }
 .input-dark > input {
-    background-color: #1e1e1e;
+    background-color: transparent;
     border-color: #6a6a6a;
-    color: #3E885B;
+    color: #dadada;
     font-weight: 600;
     letter-spacing: 0.025rem;
 }
@@ -388,7 +367,7 @@ export default {
     color: #9a9a9a;
 }
 .input-dark > .el-checkbox__input > .el-checkbox__inner {
-    background-color: #1e1e1e;
+    background-color: transparent;
     border-color: #6a6a6a;
 }
 .input-dark > .el-checkbox__input.is-checked > .el-checkbox__inner {

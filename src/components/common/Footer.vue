@@ -32,21 +32,21 @@ export default {
 
 <style lang="less" scope>
 .orgLink{
-    color: #2e2e2e;
+    color: #aeaeae;
     transition: 100ms;
 }
 .orgLink:hover{
     cursor: pointer;
-    color: #606266;
+    color: #8a8a8a;
 }
 .orgLink:focus{
-    color: #2e2e2e;
+    color: #606266;
 }
 .row-copyright {
     letter-spacing: 0.05rem;
     margin-top: 1.125rem;
     font-size: 0.875rem;
-    color: #2e2e2e;
+    color: #8a8a8a;
     text-align: center;
     user-select: none;
     -webkit-user-drag: none;
