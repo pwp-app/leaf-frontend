@@ -25,7 +25,7 @@ export default {
     margin-bottom: 16px;
 }
 .card-newapp:hover {
-    background: #f8f8f8;
+    background: #fafafa;
     cursor: pointer;
 }
 .icon {

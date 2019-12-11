@@ -62,16 +62,16 @@ export default {
 }
 // 复写 el-dialog 的样式
 .el-dialog__body{
-    padding: 4px 20px;
+    padding: 4px 20px !important;
 }
 .el-dialog__body > .el-form > .el-form-item{
-    margin-bottom: 8px;
+    margin-bottom: 8px !important;
 }
 // 复写 el-popconfirm 的样式
 .el-popconfirm__main{
-    margin: 8px 0;
+    margin: 8px 0 !important;
 }
 .el-popconfirm__action{
-    float: right;
+    float: right !important;
 }
 </style>
