@@ -66,7 +66,7 @@
                             <el-button
                                 style="float: right; padding: 3px 0px 3px 12px"
                                 type="text"
-                                :disabled="submitInfoEnaled"
+                                :disabled="!submitInfoEnaled"
                                 @click="submitEdit"
                             >保存</el-button>
                             <el-button
@@ -107,7 +107,7 @@
                 ></IconCard>
                 <IconCard
                     icon="el-icon-warning"
-                    color="#E6A23C"
+                    color="#E15554"
                     title="注销帐号"
                     desc="将您正在使用的帐号彻底废弃，从平台上注销"
                     label="注销"
@@ -117,9 +117,46 @@
                     <div slot="header" class="card-header clearfix">
                         <span>最近登录记录</span>
                     </div>
+                    <LoginLogList></LoginLogList>
                 </el-card>
             </el-col>
         </el-row>
+        <el-dialog
+            title="修改密码"
+            :visible.sync="modPasswordDialogVisible"
+            width="30%">
+            <el-form ref="changePasswordForm" :model="modPasswordForm" :rules="modPasswordFormRule">
+                <el-form-item prop="oldPassword" label="旧密码">
+                    <el-input type="password" v-model="modPasswordForm.oldPassword"></el-input>
+                </el-form-item>
+                <el-form-item prop="newPassword" label="新密码">
+                    <el-input type="password" v-model="modPasswordForm.newPassword"></el-input>
+                </el-form-item>
+                <el-form-item prop="newConfirmPassword" label="确认密码">
+                    <el-input type="password" v-model="modPasswordForm.confirmPassword"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="modPasswordDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="submitModPassword" :disabled="!submitModPasswordEnabled">确定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog
+            title="注销帐号"
+            :visible.sync="cancalAccountDialogVisible"
+            width="30%"
+            :model="cancalAccountForm" :rules="cancalAccountFormRule">
+            <el-form>
+                <span>需要您的密码确认该操作，帐号注销后所有数据都将删除，无法恢复！</span>
+                <el-form-item label="密码">
+                    <el-input type="password" v-model="cancalAccountForm.password"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="cancalAccountDialogVisible = false">取消</el-button>
+                <el-button type="danger" @click="submitCancelAccount" :disabled="!submitCancelAccountEnabled">确定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -127,13 +164,15 @@
 import UserAvatar from "@/components/app/common/UserAvatar.vue";
 import Han from '@/components/common/Han.vue';
 import IconCard from '@/components/app/main/IconCard.vue';
+import LoginLogList from '@/components/app/list/LoginLogList.vue';
 
 export default {
     name: "app.pages.usersettings",
     components: {
         UserAvatar,
         IconCard,
-        Han
+        Han,
+        LoginLogList
     },
     data() {
         return {
@@ -144,14 +183,68 @@ export default {
                 phone: "",
                 email: ""
             },
-            submitInfoEnaled: false,
-            avatarSize: 95
+            submitInfoEnaled: true,
+            avatarSize: 95,
+            // mod password
+            modPasswordDialogVisible: false,
+            submitModPasswordEnabled: true,
+            modPasswordForm: {
+                oldPassword: "",
+                newPassword: "",
+                newConfirmPassword: ""
+            },
+            modPasswordFormRule: {
+                oldPassword: [{
+                    required: true,
+                    message: '旧密码不能为空',
+                    trigger: 'blur'
+                }, {
+                    min: 6,
+                    message: '密码长度不能低于6位',
+                    trigger: 'blur'
+                }],
+                newPassword: [{
+                    required: true,
+                    message: '新密码不能为空',
+                    trigger: 'blur'
+                }, {
+                    min: 6,
+                    message: '密码长度不能低于6位',
+                    trigger: 'blur'
+                }],
+                newConfirmPassword: [{
+                    required: true,
+                    message: '确认密码不能为空',
+                    trigger: 'blur'
+                }, {
+                    min: 6,
+                    message: '密码长度不能低于6位',
+                    trigger: 'blur'
+                }]
+            },
+            // cancel account
+            cancalAccountDialogVisible: false,
+            submitCancelAccountEnabled: true,
+            cancalAccountForm: {
+                password: ''
+            },
+            cancalAccountFormRule: {
+                password: [{
+                    required: true,
+                    trigger: 'blur'
+                }]
+            }
         }
     },
     computed: {
         username() {
             return this.$store.state.userinfo.username;
         }
+    },
+    mounted(){
+        this.infoForm.username = this.$store.state.userinfo.username;
+        this.infoForm.email = this.$store.state.userinfo.email;
+        this.infoForm.phone = this.$store.state.userinfo.phone;
     },
     watch: {
         "$store.state.userinfo.username": function(newValue) {
@@ -182,15 +275,91 @@ export default {
             },0)
         },
         submitEdit(){
-
+            this.submitInfoEnaled = false;
+            this.axios.post("/api/user/changeBaseInfo", {
+                newEmail: this.infoForm.email,
+                newPhone: this.infoForm.phone
+            })
+            .then(response => {
+                this.submitInfoEnaled = true;
+                if (response.status != 200) {
+                    this.$message.error("保存失败");
+                    return;
+                }
+                if (response.data.code == 200) {
+                    this.$message.success("保存成功");
+                    this.infoFormEnabled = false;
+                    this.$store.commit("userinfo/setEmail", this.infoForm.email);
+                    this.$store.commit("userinfo/setPhone", this.infoForm.phone);
+                } else {
+                    this.$message.error(response.data.message);
+                }
+            });
         },
         // mod password
         modPasswordDialog(){
-
+            this.clearModPasswordForm()
+            this.modPasswordDialogVisible = true
+        },
+        clearModPasswordForm(){
+            this.modPasswordForm.oldPassword = ''
+            this.modPasswordForm.newPassword = ''
+            this.modPasswordForm.newConfirmPassword = ''
+        },
+        submitModPassword(){
+            this.$refs['modPasswordForm'].validate((valid) => {
+                if (!valid) {
+                    return false;
+                }
+                this.submitModPasswordEnabled = false
+                // 提交请求
+                this.axios.post('/api/user/modPassword', {
+                    oldPassword: this.modPasswordForm.oldPassword,
+                    newPassword: this.modPasswordForm.newPassword,
+                    newConfirmPassword: this.modPasswordForm,newConfirmPassword
+                }).then((response) => {
+                    this.submitModPasswordEnabled = true
+                    if (response.status != 200){
+                        this.$message.error("修改密码失败")
+                        return
+                    }
+                    if (response.data.code == 200){
+                        this.$message.success("修改密码成功")
+                        this.clearModPasswordForm();
+                        this.modPasswordDialogVisible = false;
+                    } else {
+                        this.$message.success(response.data.message)
+                    }
+                })
+            })
         },
         // cancel account
         cancelAccountDialog(){
-
+            this.clearCancelAccountForm()
+            this.cancalAccountDialogVisible = true
+        },
+        clearCancelAccountForm(){
+            this.cancalAccountForm.password = ''
+        },
+        submitCancelAccount(){
+            this.submitCancelAccountEnabled = false
+            this.axios.post('/api/user/cancelAccount', {
+                password: this.cancalAccountForm.password
+            }).then((response) => {
+                this.submitCancelAccountEnabled = true
+                if (response.status == 200){
+                    if (response.data.code == 200){
+                        this.$message.success('注销成功')
+                        setTimeout(()=>{
+                            this.$router.push({
+                                name: 'landing.home'
+                            })
+                        }, 2000);
+                    }
+                } else {
+                    this.$message.error('网络通信错误')
+                }
+            });
         }
     }
 };

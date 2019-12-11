@@ -10,10 +10,29 @@
 
 <script>
 export default {
-    name: 'app.list.loginlog'
+    name: 'app.list.loginlog',
+    data() {
+        return {
+            loginLog: [],
+            loginLogLoading: false
+        }
+    },
+    mounted() {
+        this.getList()
+    },
+    methods: {
+        getList(){
+            this.axios.get("/api/user/getLoginLog").then(response => {
+                if (response.status == 200) {
+                    this.loginLog = response.data.data;
+                }
+                this.loginLogLoading = false;
+            });
+        }
+    }
 }
 </script>
 
-<style>
+<style lang="less" scoped>
 
 </style>

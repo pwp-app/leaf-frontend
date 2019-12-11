@@ -1,7 +1,7 @@
 <template>
     <el-container class="container-base">
         <el-header class="header" height="80px">
-            <div class="title-wrapper">
+            <div class="title-wrapper" @click="toMyApps">
                 <div class="title">
                     <span>Leaf</span>
                 </div>
@@ -57,6 +57,13 @@ export default {
             }
         });
     },
+    methods: {
+        toMyApps() {
+            this.$router.push({
+                name: 'app.main.myapps'
+            })
+        }
+    }
 }
 </script>
 
@@ -78,6 +85,9 @@ export default {
     height: 100%;
     user-select: none;
     -webkit-user-drag: none;
+}
+.title-wrapper:hover {
+    cursor: pointer;
 }
 .title-icon-wrapper {
     display: inline-block;

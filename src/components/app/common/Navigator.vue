@@ -21,10 +21,10 @@
                     <i class="el-icon-s-platform"></i>
                     <span slot="title">系统管理</span>
                 </template>
-                <el-menu-item index="/admin/user">用户管理</el-menu-item>
-                <el-menu-item index="/admin/apps">应用管理</el-menu-item>
-                <el-menu-item index="/admin/announcement">公告管理</el-menu-item>
-                <el-menu-item index="/admin/invitecode">邀请码管理</el-menu-item>
+                <el-menu-item index="/app/admin/user">用户管理</el-menu-item>
+                <el-menu-item index="/app/admin/apps">应用管理</el-menu-item>
+                <el-menu-item index="/app/admin/announcement">公告管理</el-menu-item>
+                <el-menu-item index="/app/admin/invitecode">邀请码管理</el-menu-item>
             </el-submenu>
         </template>
     </el-menu>
@@ -40,7 +40,8 @@ export default {
         };
     },
     watch: {
-        "$store.state.userinfo.role": 'canShowAdmin'
+        "$store.state.userinfo.role": 'canShowAdmin',
+        "$route.path": 'pathChanged'
     },
     mounted() {
         if (this.$route.path == '/app'){
@@ -55,6 +56,13 @@ export default {
                 this.showAdmin = true
             } else {
                 this.showAdmin = false
+            }
+        },
+        pathChanged(){
+            if (this.$route.path == '/app'){
+                this.defaultActive = '/app/dashboard';
+            } else {
+                this.defaultActive = /(\/[a-zA-Z]+\/[a-zA-Z]+)/.exec(this.$route.path).length > 0 ? /(\/[a-zA-Z]+\/[a-zA-Z]+)/.exec(this.$route.path)[0] : null
             }
         }
     }

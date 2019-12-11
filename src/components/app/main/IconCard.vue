@@ -26,7 +26,7 @@ export default {
     props: ['icon', 'color', 'title', 'desc', 'label'],
     methods: {
         labelClicked() {
-            this.emit('label-clicked');
+            this.$emit('label-clicked');
         }
     }
 };

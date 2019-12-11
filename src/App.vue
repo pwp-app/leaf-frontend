@@ -37,7 +37,7 @@ export default {
 }
 </style>
 
-<style>
+<style lang="less">
 .nav {
     border: none !important;
 }
@@ -59,5 +59,19 @@ export default {
 .el-dropdown-menu{
     user-select: none;
     -webkit-user-drag: none;
+}
+// 复写 el-dialog 的样式
+.el-dialog__body{
+    padding: 4px 20px;
+}
+.el-dialog__body > .el-form > .el-form-item{
+    margin-bottom: 8px;
+}
+// 复写 el-popconfirm 的样式
+.el-popconfirm__main{
+    margin: 8px 0;
+}
+.el-popconfirm__action{
+    float: right;
 }
 </style>
