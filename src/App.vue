@@ -74,4 +74,9 @@ export default {
 .el-popconfirm__action{
     float: right !important;
 }
+// 复写 el-breadcrumb 的样式
+.el-breadcrumb__inner{
+    font-weight: 500 !important;
+    font-size: 18px !important;
+}
 </style>

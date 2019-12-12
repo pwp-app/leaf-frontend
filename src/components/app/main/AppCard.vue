@@ -1,5 +1,5 @@
 <template>
-    <el-card class="box-card card-app" @contextmenu.prevent.native="openContextMenu($event)">
+    <el-card class="box-card card-app" @click.native="cardClicked" @contextmenu.prevent.native="openContextMenu($event)">
         <div class="icon-wrapper">
             <img :src="iconPath">
         </div>
@@ -21,7 +21,7 @@
 import BasePath from '@/config/BasePath.js'
 export default {
     name: 'app.main.appcard',
-    props: ['appId', 'icon', 'index', 'name', 'bundleid', 'download'],
+    props: ['id', 'icon', 'index', 'name', 'bundleid', 'download'],
     computed: {
         iconPath: function () {
             if (this.icon){
@@ -43,6 +43,11 @@ export default {
             this.$emit('open-context', {
                 event: e,
                 index: this.index
+            })
+        },
+        cardClicked(){
+            this.$router.push({
+                path: '/app/myapps/' + this.id
             })
         }
     }
@@ -95,6 +100,7 @@ export default {
 .card-app > .el-card__body > .info-wrapper > .info-name{
     font-size: 20px;
     letter-spacing: 0.05em;
+    font-family: "PingFang", "Microsoft Yahei", "Arial";
 }
 .card-app > .el-card__body > .info-wrapper > .info-name-short{
     font-size: 22px;
@@ -108,7 +114,7 @@ export default {
 .card-app > .el-card__body > .info-wrapper > .info-bundleId > span {
     color: #606266;
     font-size: 14px;
-    font-family: "Nunito";
+    font-family: "PingFang", "Microsoft Yahei", "Arial";
 }
 .card-app > .el-card__body > .info-wrapper > .info-download {
     margin-top: 6px;
@@ -116,7 +122,7 @@ export default {
 .card-app > .el-card__body > .info-wrapper > .info-download > span {
     color: #606266;
     font-size: 14px;
-    font-family: "Nunito";
+    font-family: "PingFang", "Microsoft Yahei", "Arial";
     letter-spacing: 0.05rem;
 }
 </style>

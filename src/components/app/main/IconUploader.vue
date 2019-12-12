@@ -21,7 +21,7 @@ export default {
     prop: ['imageUrl'],
     data() {
         return {
-            imageUrl: this.imageUrl,
+            imageUrl: null,
             imageKey: null
         };
     },
@@ -29,6 +29,9 @@ export default {
         clearIcon(){
             this.imageUrl = null
             this.imageKey = null
+        },
+        setIcon(imageUrl) {
+            this.imageUrl = imageUrl
         },
         handleAvatarSuccess(res, file) {
             if (res.code != 200){

@@ -1,6 +1,6 @@
 <template>
     <div class="page-wrapper">
-        <div class="container-myapps">
+        <div class="container-myapps" v-if="this.$route.name === 'app.main.myapps'">
             <el-row class="row-overview" :gutter="16">
                 <el-col :span="8">
                     <OverviewCard icon="el-icon-star-on" label="应用总数" :value="applicationCount"></OverviewCard>
@@ -20,7 +20,7 @@
             </el-row>
             <el-row class="row-applist" :gutter="16">
                 <el-col :span="6" v-for="(app, index) in apps.slice((currentPage-1)*pageSize,currentPage*pageSize)" v-bind:key="app.id">
-                    <AppCard :id="app.id" :index="index" :name="app.displayName" :bundleid="app.bundleId" :icon="app.iconKey" :download="app.downloadCount"
+                    <AppCard :index="index" :id="app.id" :name="app.displayName" :bundleid="app.bundleId" :icon="app.iconKey" :download="app.downloadCount"
                         @open-context="openContextMenu"></AppCard>
                 </el-col>
                 <el-col v-if="total - (currentPage - 1) * pageSize < pageSize" :span="6">
@@ -29,7 +29,7 @@
             </el-row>
             <el-row class="row-applist-pagination">
                 <el-pagination
-                    id="annoListPagination"
+                    id="app-list-pagination"
                     :total="total"
                     :current-page="currentPage"
                     :page-size="pageSize"
@@ -65,17 +65,20 @@
             <div class="context-menu-wrapper">
                 <el-card v-if="contextMenuVisible" :style="{top: contextMenuTop+'px', left: contextMenuLeft+'px'}" class="box-card card-context-menu">
                     <el-row class="context-menu-item">
-                        <el-col :span="24">
+                        <el-col :span="24" @click.native="showEditAppDialog">
                             <span>编辑</span>
                         </el-col>
                     </el-row>
                     <el-row class="context-menu-item">
-                        <el-col :span="24">
+                        <el-col :span="24" @click.native="deleteApp">
                             <span class="context-menu-danger" style="color: #F56C6C">删除</span>
                         </el-col>
                     </el-row>
                 </el-card>
             </div>
+        </div>
+        <div class="container-version" v-else>
+            <router-view></router-view>
         </div>
     </div>
 </template>
@@ -115,6 +118,7 @@ export default {
             appFormStatus: 'add',
             submitAppFormEnabled: true,
             appForm: {
+                appId: null,
                 bundleId: "",
                 name: "",
                 desc: "",
@@ -138,6 +142,11 @@ export default {
                         required: true,
                         message: "名称不能为空",
                         trigger: "blur"
+                    },
+                    {
+                        max: 24,
+                        message: '应用名不能长于 24 个字符',
+                        trigger: 'blur'
                     }
                 ]
             },
@@ -159,14 +168,14 @@ export default {
         getList() {
             this.axios.get('/api/app/getAppList').then((response) => {
                 if (response.status == 200 && response.data.code == 200){
-                    this.apps = response.data.data;
-                    this.total = this.apps.length;
+                    this.apps = response.data.data
+                    this.total = this.apps.length
                 }
             })
         },
         listCurrentPageChange(currentPage) {
-            this.currentPage = currentPage;
-            this.getList();
+            this.currentPage = currentPage
+            this.getList()
         },
         // add app form
         showAddAppDialog() {
@@ -176,12 +185,32 @@ export default {
                 this.clearAppForm()
             }, 0)
         },
+        showEditAppDialog() {
+            this.appFormStatus = 'edit'
+            this.appDialogVisible = true
+            setTimeout(() => {
+                this.clearAppForm()
+                // 填入数据
+                let index = this.rightClickedIndex + (this.currentPage - 1) * this.pageSize
+                this.appForm.appId = this.apps[index].id
+                this.appForm.bundleId = this.apps[index].bundleId
+                this.appForm.name = this.apps[index].displayName
+                this.appForm.desc = this.apps[index].description
+                this.appForm.iconKey = this.apps[index].iconKey
+                if (this.appForm.iconKey){
+                    this.$refs["app-iconuploader"].setIcon(BasePath.imageBase + this.appForm.iconKey)
+                } else {
+                    this.$refs["app-iconuploader"].setIcon(null)
+                }
+            }, 0)
+        },
         clearAppForm() {
-            this.appForm.bundleId = "";
-            this.appForm.name = "";
-            this.appForm.desc = "";
-            this.appForm.iconKey = "";
-            this.$refs["app-iconuploader"].clearIcon();
+            this.appForm.appId = null
+            this.appForm.bundleId = ""
+            this.appForm.name = ""
+            this.appForm.desc = ""
+            this.appForm.iconKey = ""
+            this.$refs["app-iconuploader"].clearIcon()
         },
         submitAppForm() {
             if (this.appFormStatus == 'add'){
@@ -194,7 +223,7 @@ export default {
                     if (response.status == 200) {
                         if (response.data.code == 200) {
                             this.$message.success("添加成功");
-                            this.addAppDialogVisible = false;
+                            this.appDialogVisible = false;
                         } else {
                             this.$message.error(response.data.message);
                         }
@@ -204,7 +233,24 @@ export default {
                     }
                 });
             } else if (this.appFormStatus == 'edit') {
-
+                this.axios.post("/api/app/editApp", {
+                    appId: this.appForm.appId,
+                    name: this.appForm.name,
+                    desc: this.appForm.desc,
+                    iconKey: this.appForm.iconKey
+                }).then(response => {
+                    if (response.status == 200) {
+                        if (response.data.code == 200) {
+                            this.$message.success("编辑成功")
+                            this.appDialogVisible = false
+                        } else {
+                            this.$message.error(response.data.message)
+                        }
+                        this.getList()
+                    } else {
+                        this.$message.error("网络通信错误")
+                    }
+                });
             }
         },
         iconUploadSuccess(filekey) {
