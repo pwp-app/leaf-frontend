@@ -50,6 +50,31 @@ export default {
     user-select: none;
     -webkit-user-drag: none;
 }
+.nav > .el-submenu {
+    height: 80px !important;
+    border: none !important;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+.nav > .el-submenu > .el-submenu__title:hover{
+    background: rgba(247,247,247) !important;
+}
+.nav > .el-submenu > .el-submenu__title {
+    height: 80px !important;
+    line-height: 80px !important;
+    font-size: 15px !important;
+    border: none !important;
+    letter-spacing: 0.0375rem;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+.el-menu--popup > .el-menu-item{
+    padding: 0 16px !important;
+    font-size: 14px;
+}
+.el-menu--popup > .el-menu-item:hover{
+    background: rgba(247,247,247) !important;
+}
 .nav > .is-active > span{
     font-weight: 500 !important;
 }
@@ -78,5 +103,15 @@ export default {
 .el-breadcrumb__inner{
     font-weight: 500 !important;
     font-size: 18px !important;
+}
+// 复写 el-upload 的样式
+.el-upload__tip {
+    line-height: 24px;
+}
+.el-upload-list__item {
+    margin-top: 4px;
+}
+.el-upload-list__item-name {
+    font-size: 13px;
 }
 </style>

@@ -15,10 +15,11 @@
             <el-row class="row-applist-title">
                 <el-col :span="24">
                     <span id="applist-title">应用列表</span>
-                    <el-button id="btn-addApp" type="primary" @click="showAddAppDialog">添加应用</el-button>
+                    <el-button class="applist-action" id="btn-addApp" type="primary" @click="showAddAppDialog"><i class="el-icon-plus"></i></el-button>
+                    <el-button class="applist-action" id="btn-refreshApp" @click="getList"><i class="el-icon-refresh-right"></i></el-button>
                 </el-col>
             </el-row>
-            <el-row class="row-applist" :gutter="16">
+            <el-row class="row-applist" :gutter="16" v-loading="appListLoading">
                 <el-col :span="6" v-for="(app, index) in apps.slice((currentPage-1)*pageSize,currentPage*pageSize)" v-bind:key="app.id">
                     <AppCard :index="index" :id="app.id" :name="app.displayName" :bundleid="app.bundleId" :icon="app.iconKey" :download="app.downloadCount"
                         @open-context="openContextMenu"></AppCard>
@@ -38,7 +39,7 @@
                 ></el-pagination>
             </el-row>
             <!-- dialog -->
-            <el-dialog title="添加应用" :visible.sync="appDialogVisible" width="30%">
+            <el-dialog :title="appFormStatus == 'add' ? '添加应用' : '编辑'" :visible.sync="appDialogVisible" width="30%">
                 <el-form ref="appForm" :model="appForm" :rules="appFormRule">
                     <el-form-item prop="bundleId" label="Bundle ID">
                         <el-input v-model="appForm.bundleId" placeholder="com.example.app" :disabled="appFormStatus == 'edit'"></el-input>
@@ -46,7 +47,7 @@
                     <el-form-item prop="name" label="名称">
                         <el-input v-model="appForm.name"></el-input>
                     </el-form-item>
-                    <el-form-item label="描述">
+                    <el-form-item prop="desc" label="描述">
                         <el-input v-model="appForm.desc"></el-input>
                     </el-form-item>
                     <el-form-item label="图标">
@@ -59,7 +60,7 @@
                 </el-form>
                 <span slot="footer" class="dialog-footer">
                     <el-button @click="appDialogVisible = false">取消</el-button>
-                    <el-button type="danger" @click="submitAppForm" :disabled="!submitAppFormEnabled">确定</el-button>
+                    <el-button type="primary" @click="submitAppForm" :disabled="!submitAppFormEnabled">确定</el-button>
                 </span>
             </el-dialog>
             <div class="context-menu-wrapper">
@@ -113,6 +114,7 @@ export default {
             contextMenuTop: 0,
             contextMenuLeft: 0,
             rightClickedIndex: null,
+            appListLoading: false,
             // app form
             appDialogVisible: false,
             appFormStatus: 'add',
@@ -148,6 +150,13 @@ export default {
                         message: '应用名不能长于 24 个字符',
                         trigger: 'blur'
                     }
+                ],
+                desc: [
+                    {
+                        max: 100,
+                        message: '描述不能长于 100 个字符',
+                        trigger: 'blur'
+                    }
                 ]
             },
         };
@@ -166,7 +175,9 @@ export default {
     },
     methods: {
         getList() {
+            this.appListLoading = true
             this.axios.get('/api/app/getAppList').then((response) => {
+                this.appListLoading = false
                 if (response.status == 200 && response.data.code == 200){
                     this.apps = response.data.data
                     this.total = this.apps.length
@@ -213,45 +224,50 @@ export default {
             this.$refs["app-iconuploader"].clearIcon()
         },
         submitAppForm() {
-            if (this.appFormStatus == 'add'){
-                this.axios.post("/api/app/addApp", {
-                    bundleId: this.appForm.bundleId,
-                    name: this.appForm.name,
-                    desc: this.appForm.desc,
-                    iconKey: this.appForm.iconKey
-                }).then(response => {
-                    if (response.status == 200) {
-                        if (response.data.code == 200) {
-                            this.$message.success("添加成功");
-                            this.appDialogVisible = false;
+            this.$refs['appForm'].validate((valid) => {
+                if (!valid) {
+                    return false;
+                }
+                if (this.appFormStatus == 'add'){
+                    this.axios.post("/api/app/addApp", {
+                        bundleId: this.appForm.bundleId,
+                        name: this.appForm.name,
+                        desc: this.appForm.desc,
+                        iconKey: this.appForm.iconKey
+                    }).then(response => {
+                        if (response.status == 200) {
+                            if (response.data.code == 200) {
+                                this.$message.success("添加成功");
+                                this.appDialogVisible = false;
+                            } else {
+                                this.$message.error(response.data.message);
+                            }
+                            this.getList();
                         } else {
-                            this.$message.error(response.data.message);
+                            this.$message.error("网络通信错误");
                         }
-                        this.getList();
-                    } else {
-                        this.$message.error("网络通信错误");
-                    }
-                });
-            } else if (this.appFormStatus == 'edit') {
-                this.axios.post("/api/app/editApp", {
-                    appId: this.appForm.appId,
-                    name: this.appForm.name,
-                    desc: this.appForm.desc,
-                    iconKey: this.appForm.iconKey
-                }).then(response => {
-                    if (response.status == 200) {
-                        if (response.data.code == 200) {
-                            this.$message.success("编辑成功")
-                            this.appDialogVisible = false
+                    });
+                } else if (this.appFormStatus == 'edit') {
+                    this.axios.post("/api/app/editApp", {
+                        appId: this.appForm.appId,
+                        name: this.appForm.name,
+                        desc: this.appForm.desc,
+                        iconKey: this.appForm.iconKey
+                    }).then(response => {
+                        if (response.status == 200) {
+                            if (response.data.code == 200) {
+                                this.$message.success("编辑成功")
+                                this.appDialogVisible = false
+                            } else {
+                                this.$message.error(response.data.message)
+                            }
+                            this.getList()
                         } else {
-                            this.$message.error(response.data.message)
+                            this.$message.error("网络通信错误")
                         }
-                        this.getList()
-                    } else {
-                        this.$message.error("网络通信错误")
-                    }
-                });
-            }
+                    });
+                }
+            });
         },
         iconUploadSuccess(filekey) {
             this.appForm.iconKey = filekey;
@@ -265,6 +281,32 @@ export default {
         },
         closeContextMenu(){
             this.contextMenuVisible = false
+        },
+        deleteApp() {
+            let index = this.rightClickedIndex + (this.currentPage - 1) * this.pageSize
+            this.$confirm('此操作将永久删除应用 ['+this.apps[index].displayName+'] 及其关联的所有数据，是否继续？', '警告', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'danger'
+            }).then(() => {
+                this.axios.post('/api/app/deleteApp', {
+                    appId: this.apps[index].id
+                }).then((response) => {
+                    if (response.status != 200){
+                        this.$message.error('网络通信错误')
+                        return
+                    }
+                    if (response.data.code != 200){
+                        this.$message.error(response.data.message)
+                        return
+                    }
+                    this.$message.success('删除成功')
+                    this.getList()
+                })
+            }).catch(()=>{
+                // catch cancel
+                // do nothing
+            });
         }
     }
 };
@@ -282,8 +324,16 @@ export default {
 #applist-title {
     line-height: 40px;
 }
-#btn-addApp {
+.applist-action {
     float: right;
+    padding: 12px;
+}
+.applist-action > span{
+    font-size: 16px;
+    font-weight: 600;
+}
+#btn-addApp{
+    margin-left: 10px;
 }
 .row-applist-pagination {
     margin-top: 8px;

@@ -18,12 +18,10 @@
         <template v-if="showAdmin">
             <el-submenu index="sub-admin">
                 <template slot="title">
-                    <i class="el-icon-s-platform"></i>
                     <span slot="title">系统管理</span>
                 </template>
                 <el-menu-item index="/app/admin/user">用户管理</el-menu-item>
                 <el-menu-item index="/app/admin/apps">应用管理</el-menu-item>
-                <el-menu-item index="/app/admin/announcement">公告管理</el-menu-item>
                 <el-menu-item index="/app/admin/invitecode">邀请码管理</el-menu-item>
             </el-submenu>
         </template>

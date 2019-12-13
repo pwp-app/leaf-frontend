@@ -27,7 +27,7 @@
                     <div slot="header" class="card-header clearfix">
                         <span>当前版本</span>
                     </div>
-                    <CurrentVersionList></CurrentVersionList>
+                    <CurrentVersionList :data="currentVersionData"></CurrentVersionList>
                 </el-card>
             </el-col>
             <el-col :span="16">
@@ -36,13 +36,37 @@
                         <span>版本列表</span>
                         <div class="table-header-operation">
                             <el-button size="small" @click="refreshVersionList">刷新</el-button>
-                            <el-button size="small" type="primary" @click="showAddVersionDialog">添加版本</el-button>
+                            <el-button size="small" type="primary" @click="showAddVersionDialog" :disabled="!appEnabled">添加版本</el-button>
                         </div>
                     </div>
-                    <VersionList :id="$route.params.appId"></VersionList>
+                    <VersionList ref="versionList" :appid="$route.params.appId" @download="handleDownload" @version-deleted="handleDeleted"></VersionList>
                 </el-card>
             </el-col>
         </el-row>
+        <el-dialog :title="versionFormStatus == 'add' ? '添加版本' : '编辑版本'" :visible.sync="versionFormVisible" width="30%">
+            <el-form ref="versionForm" :model="versionForm" :rules="versionFormRule">
+                <el-form-item prop="platform" label="平台">
+                    <el-select class="form-select" v-model="versionForm.platform" placeholder="请选择">
+                        <el-option
+                            v-for="item in platformOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item prop="version" label="版本">
+                    <el-input v-model="versionForm.version" placeholder="例: 1.0.0"></el-input>
+                </el-form-item>
+                <el-form-item prop="fileKey" class="file-uploader" label="安装文件">
+                    <FileUploader :platform="versionForm.platform" @upload-success="appUploadSuccess"></FileUploader>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="versionFormVisible = false">取消</el-button>
+                <el-button type="primary" @click="submitVersionForm" :disabled="!submitVersionEnabled">确定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -50,6 +74,7 @@
 import CurrentVersionList from "@/components/app/list/CurrentVersionList.vue"
 import VersionList from "@/components/app/list/VersionList.vue"
 import NumberCard from "@/components/app/main/NumberCard.vue"
+import FileUploader from "@/components/app/main/FileUploader.vue"
 import { Loading } from 'element-ui'
 import BasePath from "@/config/BasePath.js"
 
@@ -58,6 +83,7 @@ export default {
     components: {
         CurrentVersionList,
         NumberCard,
+        FileUploader,
         VersionList
     },
     data() {
@@ -72,7 +98,51 @@ export default {
             defaultIcon: BasePath.imageBase + 'leaf/no-icon.png',
             // detail
             currentVersionData: [],
-            versionCount: 0
+            versionCount: 0,
+            // version form
+            versionFormVisible: false,
+            versionFormStatus: '',
+            submitVersionEnabled: true,
+            versionForm: {
+                platform: '',
+                version: '',
+                fileKey: ''
+            },
+            versionFormRule: {
+                platform: [{
+                    required: true,
+                    message: '请选择平台'
+                }],
+                version: [{
+                    required: true,
+                    message: '请填入版本'
+                }, {
+                    pattern: /^[0-9]+\.[0-9]+\.[0-9]+$/,
+                    message: '版本号格式错误',
+                    trigger: 'blur'
+                }],
+                fileKey: [{
+                    required: true,
+                    message: '请上传版本对应的安装包',
+                    trigger: 'blur'
+                }]
+            },
+            platformOptions: [{
+                value: 'windows',
+                label: 'Windows'
+            }, {
+                value: 'linux',
+                label: 'Linux'
+            }, {
+                value: 'macos',
+                label: 'macOS'
+            }, {
+                value: 'android',
+                label: 'Android'
+            }, {
+                value: 'ios',
+                label: 'iOS / iPad OS'
+            }]
         }
     },
     watch: {
@@ -84,6 +154,7 @@ export default {
     methods: {
         getData() {
             this.getInfo()
+            this.initVersionList()
         },
         getInfo() {
             let loadingInstance = Loading.service({
@@ -122,8 +193,65 @@ export default {
                 }
             })
         },
-        refreshVersionList() {},
-        showAddVersionDialog() {}
+        initVersionList() {
+            this.$refs.versionList.initList()
+        },
+        refreshVersionList() {
+            this.$refs.versionList.refreshList()
+        },
+        // version form
+        showAddVersionDialog() {
+            this.versionFormVisible = true
+            this.clearVersionForm()
+            this.versionFormStatus = 'add'
+        },
+        clearVersionForm() {
+            this.versionForm.platform = ''
+            this.versionForm.version = ''
+            this.versionForm.fileKey = ''
+        },
+        submitVersionForm() {
+            this.$refs['versionForm'].validate((valid) => {
+                if (!valid) {
+                    return false;
+                }
+                if (this.versionFormStatus == 'add'){
+                    this.axios.post('/api/app/addVersion', {
+                        appId: this.$route.params.appId,
+                        platform: this.versionForm.platform,
+                        version: this.versionForm.version,
+                        fileKey: this.versionForm.fileKey
+                    }).then((response) => {
+                        if (response.status != 200){
+                            this.$message.error("网络通信错误");
+                            return;
+                        }
+                        if (response.data.code != 200){
+                            this.$message.error(response.data.message)
+                            return;
+                        }
+                        this.$message.success('添加成功')
+                        this.versionFormVisible = false
+                        this.refreshVersionList()
+                    })
+                }
+            });
+        },
+        handleDownload(row){
+            let downloadTag = document.createElement('a')
+            downloadTag.setAttribute('id', 'x-filedownload')
+            downloadTag.setAttribute('href', BasePath.appBase + row.fileKey + '?attname='+this.name + ' '+row.version+row.fileKey.replace(row.fileKey.split('.')[0],''))
+            downloadTag.setAttribute('style', 'display: none')
+            document.body.appendChild(downloadTag)
+            downloadTag.click()
+            document.body.removeChild(downloadTag)
+        },
+        handleDeleted(){
+            this.getInfo()
+        },
+        appUploadSuccess(res) {
+            this.versionForm.fileKey = res.key
+        }
     }
 }
 </script>
@@ -194,7 +322,7 @@ export default {
     padding: 0 8px;
 }
 .info-name-disabled-desc {
-    transform: translateY(10px);
+    transform: translateY(12px);
 }
 
 // detail
@@ -223,5 +351,15 @@ export default {
     &:last-child {
         margin-bottom: 0px !important;
     }
+}
+.form-select {
+    display: block;
+}
+.form-select .el-input__suffix{
+    top: 50%;
+    height: 50%;
+}
+.file-uploader .el-form-item__label {
+    float: none;
 }
 </style>

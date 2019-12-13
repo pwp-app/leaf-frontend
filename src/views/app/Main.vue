@@ -73,11 +73,9 @@ export default {
 }
 .container-main {
     background: #f4f4f4;
+    padding: 0 16rem 2rem 16rem;
 }
 .header{
-    padding: 0 16rem;
-}
-.container-main{
     padding: 0 16rem;
 }
 .title-wrapper{

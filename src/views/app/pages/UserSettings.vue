@@ -276,7 +276,7 @@ export default {
         },
         submitEdit(){
             this.submitInfoEnaled = false;
-            this.axios.post("/api/user/changeBaseInfo", {
+            this.axios.post("/api/user/modInfo", {
                 newEmail: this.infoForm.email,
                 newPhone: this.infoForm.phone
             })
@@ -342,23 +342,28 @@ export default {
             this.cancalAccountForm.password = ''
         },
         submitCancelAccount(){
-            this.submitCancelAccountEnabled = false
-            this.axios.post('/api/user/cancelAccount', {
-                password: this.cancalAccountForm.password
-            }).then((response) => {
-                this.submitCancelAccountEnabled = true
-                if (response.status == 200){
-                    if (response.data.code == 200){
-                        this.$message.success('注销成功')
-                        setTimeout(()=>{
-                            this.$router.push({
-                                name: 'landing.home'
-                            })
-                        }, 2000);
-                    }
-                } else {
-                    this.$message.error('网络通信错误')
+            this.$refs['cancelAccountForm'].validate((valid) => {
+                if (!valid) {
+                    return false;
                 }
+                this.submitCancelAccountEnabled = false
+                this.axios.post('/api/user/cancelAccount', {
+                    password: this.cancalAccountForm.password
+                }).then((response) => {
+                    this.submitCancelAccountEnabled = true
+                    if (response.status == 200){
+                        if (response.data.code == 200){
+                            this.$message.success('注销成功')
+                            setTimeout(()=>{
+                                this.$router.push({
+                                    name: 'landing.home'
+                                })
+                            }, 2000);
+                        }
+                    } else {
+                        this.$message.error('网络通信错误')
+                    }
+                });
             });
         }
     }
@@ -435,5 +440,8 @@ export default {
 .card-table > .el-card__header {
     padding: 14px 20px;
     font-size: 15px;
+}
+.card-table > .el-card__body {
+    padding: 2px 16px 20px 16px;
 }
 </style>
