@@ -39,7 +39,7 @@
                             <el-button size="small" type="primary" @click="showAddVersionDialog" :disabled="!appEnabled">添加版本</el-button>
                         </div>
                     </div>
-                    <VersionList ref="versionList" :appid="$route.params.appId" @download="handleDownload" @version-deleted="handleDeleted"></VersionList>
+                    <VersionList ref="versionList" :appid="$route.params.appId" @download="handleDownload" @share="handleShare" @version-deleted="handleDeleted"></VersionList>
                 </el-card>
             </el-col>
         </el-row>
@@ -65,6 +65,28 @@
             <span slot="footer" class="dialog-footer">
                 <el-button @click="versionFormVisible = false">取消</el-button>
                 <el-button type="primary" @click="submitVersionForm" :disabled="!submitVersionEnabled">确定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog title="生成分享链接" :visible.sync="shareDialogVisible" width="30%">
+            <el-form ref="shareForm" :model="shareForm">
+                <el-form-item prop="expires" label="有效期">
+                    <el-select class="form-select" v-model="shareForm.expires">
+                        <el-option
+                            v-for="item in expiresOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" size="small" style="float: right;margin-top: 8px;" @click="generateKey" :disabled="generateKeyDisabled">生成</el-button>
+                </el-form-item>
+                <el-form-item prop="version" label="分享链接" v-show="share.key">
+                    <el-input v-model="share.key"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer" style="padding: 8px 0;">
             </span>
         </el-dialog>
     </div>
@@ -142,6 +164,72 @@ export default {
             }, {
                 value: 'ios',
                 label: 'iOS / iPad OS'
+            }],
+            // share
+            shareDialogVisible: false,
+            generateKeyDisabled: false,
+            share: {
+                versionId: null,
+                version: null,
+                key: null
+            },
+            shareForm: {
+                expires: 0
+            },
+            expiresOptions: [{
+                value: 0,
+                label: '永久'
+            },{
+                value: 5,
+                label: '5 分钟',
+            }, {
+                value: 30,
+                label: '30 分钟',
+            }, {
+                value: 60,
+                label: '1 小时',
+            }, {
+                value: 180,
+                label: '3 小时',
+            }, {
+                value: 360,
+                label: '6 小时',
+            }, {
+                value: 480,
+                label: '8 小时',
+            }, {
+                value: 720,
+                label: '12 小时',
+            }, {
+                value: 1440,
+                label: '1 天',
+            }, {
+                value: 4320,
+                label: '3 天',
+            }, {
+                value: 10080,
+                label: '7 天',
+            }, {
+                value: 20160,
+                label: '14 天',
+            }, {
+                value: 43200,
+                label: '30 天',
+            }, {
+                value: 86400,
+                label: '60 天',
+            }, {
+                value: 129600,
+                label: '90 天',
+            }, {
+                value: 259200,
+                label: '180 天',
+            }, {
+                value: 388800,
+                label: '270 天',
+            }, {
+                value: 518400,
+                label: '360 天',
             }]
         }
     },
@@ -233,6 +321,7 @@ export default {
                         this.$message.success('添加成功')
                         this.versionFormVisible = false
                         this.refreshVersionList()
+                        this.getInfo()
                     })
                 }
             });
@@ -245,6 +334,42 @@ export default {
             document.body.appendChild(downloadTag)
             downloadTag.click()
             document.body.removeChild(downloadTag)
+        },
+        handleShare(row){
+            // 清空
+            this.resetShare()
+            this.clearShareForm()
+            // 设置值
+            this.share.versionId = row.id
+            this.share.version = row.version
+            // 弹出对话框
+            this.shareDialogVisible = true
+        },
+        resetShare(){
+            this.share.versionId = null
+            this.share.version = ''
+            this.share.key = ''
+        },
+        clearShareForm() {
+            this.shareForm.expires = 0
+        },
+        generateKey(){
+            this.generateKeyDisabled = true
+            this.axios.post('/api/app/getDownloadKey', {
+                appId: this.$route.params.appId,
+                versionId: this.share.versionId,
+                expires: this.shareForm.expires
+            }).then((response) => {
+                if (response.status != 200){
+                    this.$message.error("网络通信错误");
+                    return;
+                }
+                if (response.data.code != 200){
+                    this.$message.error(response.data.message)
+                    return;
+                }
+                this.share.key = window.location.protocol + "//" + window.location.host + "/download/" + response.data.data
+            })
         },
         handleDeleted(){
             this.getInfo()

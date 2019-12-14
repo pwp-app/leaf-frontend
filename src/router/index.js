@@ -46,6 +46,30 @@ const routes = [{
             meta: {
                 title: '用户设置'
             }
+        },
+        {
+            path: 'admin/user',
+            name: 'app.admin.user',
+            component: () => import( /* webpackChunkName: "app.admin.user" */ '../views/app/pages/UserManage.vue'),
+            meta: {
+                title: '用户管理'
+            }
+        },
+        {
+            path: 'admin/apps',
+            name: 'app.admin.app',
+            component: () => import( /* webpackChunkName: "app.admin.app" */ '../views/app/pages/AppManage.vue'),
+            meta: {
+                title: '应用管理'
+            }
+        },
+        {
+            path: 'admin/invitecode',
+            name: 'app.admin.invitecode',
+            component: () => import( /* webpackChunkName: "app.admin.invitecode" */ '../views/app/pages/InviteCode.vue'),
+            meta: {
+                title: '邀请码管理'
+            }
         }]
     },
     {

@@ -69,8 +69,8 @@ export default {
         handleDownload(row, index) {
             this.$emit('download', row)
         },
-        handleShare() {
-
+        handleShare(row, index) {
+            this.$emit('share', row)
         },
         handleDelete(row, index){
             this.$confirm('此操作将永久删除该版本，是否继续？', '警告', {
