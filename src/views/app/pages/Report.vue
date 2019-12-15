@@ -4,23 +4,23 @@
             <el-col :span="24">
                 <el-card class="box-card card-table">
                     <div slot="header" class="card-header clearfix">
-                        <span>应用列表</span>
+                        <span>数据报表</span>
                         <div class="table-header-operation">
                             <el-button size="small" @click="refreshTable">刷新</el-button>
                         </div>
                     </div>
-                    <AdminAppList ref="list"></AdminAppList>
+                    <ReportList ref="list"></ReportList>
                 </el-card>
             </el-col>
         </el-row>
     </div>
 </template>
 <script>
-import AdminAppList from '@/components/app/list/AdminAppList.vue'
+import ReportList from '@/components/app/list/ReportList.vue'
 export default {
-    name: 'app.admin.user',
+    name: 'app.main.report',
     components: {
-        AdminAppList
+        ReportList
     },
     methods: {
         refreshTable(){

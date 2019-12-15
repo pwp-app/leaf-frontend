@@ -51,6 +51,7 @@ export default {
                     this.versionData = response.data.data.list
                 } else {
                     this.versionData = []
+                    this.total = 0
                 }
             })
         },

@@ -65,12 +65,12 @@ export default {
 
 <style lang="less" scoped>
 .home-main {
-    background: rgba(250,251,252);
+    background: darken(#fff, 3%);
     user-select: none;
     -webkit-user-drag: none;
 }
 .home-footer{
-    background: rgba(250,251,252);
+    background: darken(#fff, 3%);
     user-select: none;
     -webkit-user-drag: none;
 }

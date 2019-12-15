@@ -32,7 +32,7 @@ axios.interceptors.response.use(
                     name: 'landing.portal'
                 })
             }
-            return Promise.reject(error.response.data)  // 返回接口返回的错误信息
+            return Promise.resolve(error.response.data)  // 返回接口返回的错误信息
         }
     }
 );

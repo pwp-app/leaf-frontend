@@ -1,7 +1,7 @@
 <template>
     <div class="table-wrapper">
         <el-table :data="data" style="width: 100%" v-loading="tableLoading">
-            <el-table-column prop="id" label="ID" width="100" :sortable="true"></el-table-column>
+            <el-table-column prop="id" label="ID" width="100"></el-table-column>
             <el-table-column prop="username" label="用户名" width="180"></el-table-column>
             <el-table-column prop="createTime" label="注册时间" width="180"></el-table-column>
             <el-table-column prop="role" :formatter="roleFormatter" label="角色"></el-table-column>
@@ -54,11 +54,13 @@ export default {
                     this.data = response.data.data.list
                 } else {
                     this.data = []
+                    this.total = 0
                 }
             })
         },
         currentPageChange(currentPage) {
             this.currentPage = currentPage
+            this.getList()
         },
         handleSetAdmin(index, row){
             this.$confirm('此操作会将用户 ['+row.username+'] 设为管理员，是否继续？', '警告', {
@@ -197,7 +199,7 @@ export default {
                 this.listLoading = false
                 if (response.status == 200 && response.data.code == 200){
                     this.total = response.data.data.total
-                    this.listData = response.data.data.list
+                    this.data = response.data.data.list
                 }
             })
         },

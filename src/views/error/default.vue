@@ -2,13 +2,13 @@
     <el-container class="container-error">
         <div class="error-wrapper">
             <div class="error-code">
-                <span>404</span>
+                <span>ERROR</span>
             </div>
             <div class="error-desc">
-                <span>Nothing here.</span>
+                <span>页面似乎未能正确加载</span>
             </div>
             <div class="error-action">
-                <el-button type="primary" class="btn-dark" @click="toHome">回到主页</el-button>
+                <el-button type="primary" class="btn-dark" @click="toBack">返回上一页</el-button>
             </div>
         </div>
     </el-container>
@@ -17,10 +17,8 @@
 export default {
     name: "error.404",
     methods: {
-        toHome(){
-            this.$router.push({
-                name: 'landing.home'
-            })
+        toBack(){
+            this.$router.back(-1)
         }
     }
 };

@@ -53,11 +53,13 @@ export default {
                     this.data = response.data.data.list
                 } else {
                     this.data = []
+                    this.total = 0
                 }
             })
         },
         currentPageChange(currentPage){
             this.currentPage = currentPage
+            this.getList()
         },
         handleBan(index, row){
             this.$confirm('此操作将禁用应用 ['+row.displayName+']，是否继续？', '提示', {

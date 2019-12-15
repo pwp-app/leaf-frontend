@@ -304,12 +304,14 @@ export default {
                     return false;
                 }
                 if (this.versionFormStatus == 'add'){
+                    this.submitVersionEnabled = false
                     this.axios.post('/api/app/addVersion', {
                         appId: this.$route.params.appId,
                         platform: this.versionForm.platform,
                         version: this.versionForm.version,
                         fileKey: this.versionForm.fileKey
                     }).then((response) => {
+                        this.submitVersionEnabled = true
                         if (response.status != 200){
                             this.$message.error("网络通信错误");
                             return;
@@ -360,6 +362,7 @@ export default {
                 versionId: this.share.versionId,
                 expires: this.shareForm.expires
             }).then((response) => {
+                this.generateKeyDisabled = false
                 if (response.status != 200){
                     this.$message.error("网络通信错误");
                     return;
@@ -368,6 +371,7 @@ export default {
                     this.$message.error(response.data.message)
                     return;
                 }
+                this.$message.success('生成成功')
                 this.share.key = window.location.protocol + "//" + window.location.host + "/download/" + response.data.data
             })
         },

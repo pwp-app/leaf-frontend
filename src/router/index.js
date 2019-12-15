@@ -39,12 +39,21 @@ const routes = [{
                     title: '应用详情'
                 }
             }]
-        }, {
+        },
+        {
             path: 'usersettings',
             name: 'app.main.usersettings',
             component: () => import( /* webpackChunkName: "app.main.usersettings" */ '../views/app/pages/UserSettings.vue'),
             meta: {
                 title: '用户设置'
+            }
+        },
+        {
+            path: 'report',
+            name: 'app.main.report',
+            component: () => import( /* webpackChunkName: "app.main.report" */ '../views/app/pages/Report.vue'),
+            meta: {
+                title: '数据报表'
             }
         },
         {
@@ -71,6 +80,22 @@ const routes = [{
                 title: '邀请码管理'
             }
         }]
+    },
+    {
+        path: '/download/:key',
+        name: 'download',
+        component: () => import( /* webpackChunkName: "download" */ '../views/download/DownloadPage.vue'),
+        meta: {
+            title: '下载'
+        }
+    },
+    {
+        path: '/error/default',
+        name: 'error.default',
+        component: () => import( /* webpackChunkName: "error.404" */ '../views/error/default.vue'),
+        meta: {
+            title: 'Error'
+        }
     },
     {
         path: '/error/404',

@@ -38,6 +38,10 @@ export default {
 </style>
 
 <style lang="less">
+body {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
 .nav {
     border: none !important;
 }
