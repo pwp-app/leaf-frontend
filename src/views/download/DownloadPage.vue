@@ -1,7 +1,7 @@
 <template>
     <el-container class="container-base" v-loading="pageLoading">
         <el-main class="container-main">
-            <el-card class="card-app">
+            <el-card class="card-app" v-if="linkAvaliable">
                 <div class="hole"></div>
                 <el-row class="row-logo">
                     <el-col :span="24">
@@ -32,7 +32,7 @@
                             <span>版本说明</span>
                         </div>
                         <div class="desc-wrapper">
-                            <span>{{}}</span>
+                            <span>{{versionDesc}}</span>
                         </div>
                     </el-col>
                 </el-row>
@@ -42,7 +42,7 @@
                             <span>更新于 : {{createTime}}</span>
                         </div>
                         <div class="download-action download-action-button" v-if="(platform != 'ios' && platform != 'android') || isMobile()">
-                            <el-button type="secondary" round><i class="el-icon-bottom"></i><a class="button-text">点我下载</a></el-button>
+                            <el-button type="secondary" round @click="handleDownload"><i class="el-icon-bottom"></i><a class="button-text">点我下载</a></el-button>
                         </div>
                         <div class="download-action" v-else>
                             <div class="qrcode-wrapper">
@@ -51,16 +51,32 @@
                         </div>
                     </el-col>
                 </el-row>
-                <div class="from">
-                    <span>Powered by <span class="from-brand" @click="toHome">Leaf</span></span>
+            </el-card>
+            <el-card class="card-expired" v-else>
+                <div class="expired-wrapper">
+                    <div class="hole"></div>
+                    <el-row class="row-expired">
+                        <el-col :span="24">
+                            <div class="expired-icon">
+                                <i class="el-icon-close"></i>
+                            </div>
+                            <div class="expired-text">
+                                <span>链接已过期</span>
+                            </div>
+                        </el-col>
+                    </el-row>
                 </div>
             </el-card>
+            <div class="from">
+                <span>Powered by <span class="from-brand" @click="toHome">Leaf</span></span>
+            </div>
         </el-main>
     </el-container>
 </template>
 <script>
 import BasePath from '@/config/BasePath.js'
 import QRCode from 'qrcode'
+import Han from '@/utils/han.simple.js'
 
 export default {
     name: 'download.main',
@@ -68,13 +84,16 @@ export default {
         return {
             logoPath: '',
             name: '',
-            version: '',
             desc: '',
             createTime: '',
+            version: '',
+            versionDesc: '',
             platform: '',
             platformName: '',
+            fileKey: '',
             pageLoading: false,
-            qrcode: ''
+            qrcode: '',
+            linkAvaliable: true
         }
     },
     mounted(){
@@ -89,6 +108,10 @@ export default {
                 }
             }).then((response) => {
                 this.pageLoading = false
+                if (response.status == 200 && response.data.code == 406){
+                    this.linkAvaliable = false
+                    return
+                }
                 if (response.status != 200 || response.data.code != 200){
                     this.$router.push({
                         name: 'error.default'
@@ -97,17 +120,31 @@ export default {
                 }
                 this.logoPath = BasePath.imageBase + response.data.data.iconKey
                 this.name = response.data.data.name
-                this.desc = (response.data.data.desc && response.data.data.desc.length > 0  ? response.data.data.desc : '无')
+                this.desc = (response.data.data.desc && response.data.data.desc.length > 0  ? Han.insertSpace(response.data.data.desc) : '无')
                 this.createTime = response.data.data.createTime
                 this.version = response.data.data.version
+                this.versionDesc = (response.data.data.versionDesc && response.data.data.versionDesc.length > 0 ? Han.insertSpace(response.data.data.versionDesc) : '无')
                 this.platform = response.data.data.platform
                 this.platformName = this.platformFormatter(this.platform)
+                this.fileKey = response.data.data.fileKey
                 if (this.platform == 'android' || this.platform == 'ios'){
                     QRCode.toDataURL(window.location.href).then(url => {
                         this.qrcode = url
                     })
                 }
             });
+        },
+        handleDownload(){
+            this.axios.post('/api/download/submitLog', {
+                key: this.$route.params.key
+            })
+            let downloadTag = document.createElement('a')
+            downloadTag.setAttribute('id', 'x-filedownload')
+            downloadTag.setAttribute('href', BasePath.appBase + this.fileKey + '?attname='+this.name + '%20' + this.version + this.fileKeyrow.fileKey.replace(row.fileKey.split('.')[0],''));
+            downloadTag.setAttribute('style', 'display: none')
+            document.body.appendChild(downloadTag)
+            downloadTag.click()
+            document.body.removeChild(downloadTag)
         },
         isMobile(){
             return navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)
@@ -139,6 +176,21 @@ export default {
 }
 .container-main {
     display: flex;
+    position: relative;
+}
+.container-main::-webkit-scrollbar {
+    width: 8px;
+    z-index: 10;
+}
+.container-main::-webkit-scrollbar-track-piece {
+    background: darken(#fff, 5%);
+}
+.container-main::-webkit-scrollbar-thumb {
+    border-radius: 9px;
+    background-color: darken(#fff, 25%);
+}
+.container-main::-webkit-scrollbar-button {
+    display: none;
 }
 .card-app{
     width: 432px;
@@ -147,9 +199,16 @@ export default {
     border-radius: 16px;
     background-color: darken(#fff, 1.75%);
 }
+.card-expired{
+    width: 432px;
+    height: 220px;
+    margin: auto;
+    border-radius: 16px;
+    background-color: darken(#fff, 1.75%);
+}
 .hole{
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     background: darken(#fff, 5%);
     box-shadow: 3px 3px 3px 0 rgba(0,0,0,.075) inset;
     border: #eeeeee 1px solid;
@@ -276,7 +335,7 @@ export default {
 }
 .from{
     position: absolute;
-    bottom: 64px;
+    bottom: calc((100% - 760px) / 2 - 42px);
     text-align: center;
     left: 50%;
     transform: translateX(-50%);
@@ -307,6 +366,25 @@ export default {
     width: 130px;
     height: 130px;
     border-radius: 12px;
+}
+// expired
+.row-expired{
+    margin-top: 26px;
+}
+.expired-icon {
+    text-align: center;
+    color: #909399;
+    font-weight: 700;
+    font-size: 42px;
+}
+.expired-text{
+    text-align: center;
+    color: #909399;
+    font-weight: 600;
+    font-size: 24px;
+    font-family: "PingFang", "Microsoft Yahei";
+    line-height: 36px;
+    letter-spacing: 0.05em;
 }
 @media (max-width: 1024px) {
     .from{

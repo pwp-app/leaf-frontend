@@ -292,6 +292,7 @@ export default {
                     username: this.registerForm.username,
                     password: this.registerForm.password,
                     confirmPassword: this.registerForm.confirmPassword,
+                    inviteCode: this.registerForm.inviteCode,
                     recaptchaToken: token
                 }).then((response)=>{
                     if (response.status != 200){

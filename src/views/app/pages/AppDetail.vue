@@ -58,6 +58,9 @@
                 <el-form-item prop="version" label="版本">
                     <el-input v-model="versionForm.version" placeholder="例: 1.0.0"></el-input>
                 </el-form-item>
+                <el-form-item prop="desc" label="版本说明">
+                    <el-input v-model="versionForm.desc"></el-input>
+                </el-form-item>
                 <el-form-item prop="fileKey" class="file-uploader" label="安装文件">
                     <FileUploader :platform="versionForm.platform" @upload-success="appUploadSuccess"></FileUploader>
                 </el-form-item>
@@ -127,6 +130,7 @@ export default {
             submitVersionEnabled: true,
             versionForm: {
                 platform: '',
+                desc: '',
                 version: '',
                 fileKey: ''
             },
@@ -142,6 +146,10 @@ export default {
                     pattern: /^[0-9]+\.[0-9]+\.[0-9]+$/,
                     message: '版本号格式错误',
                     trigger: 'blur'
+                }],
+                desc: [{
+                    max: 200,
+                    message: '版本说明过长'
                 }],
                 fileKey: [{
                     required: true,
@@ -295,6 +303,7 @@ export default {
         },
         clearVersionForm() {
             this.versionForm.platform = ''
+            this.versionForm.desc = ''
             this.versionForm.version = ''
             this.versionForm.fileKey = ''
         },
@@ -309,6 +318,7 @@ export default {
                         appId: this.$route.params.appId,
                         platform: this.versionForm.platform,
                         version: this.versionForm.version,
+                        desc: this.versionForm.desc,
                         fileKey: this.versionForm.fileKey
                     }).then((response) => {
                         this.submitVersionEnabled = true

@@ -17,7 +17,7 @@
             </div>
         </el-header>
         <el-container>
-            <el-main class="container-main">
+            <el-main class="container-main" id="container-main">
                 <div class="breadcrumb">
                     <Breadcrumb></Breadcrumb>
                 </div>
@@ -56,6 +56,30 @@ export default {
                 }
             }
         });
+        // 绑定滚动
+        let mainContainer = document.getElementById('container-main');
+        mainContainer.addEventListener('wheel', (e) =>{
+            var scrollTop = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
+            if(document.documentElement.scrollHeight != document.documentElement.clientHeight + scrollTop && e.deltaY > 0){
+                e.preventDefault()
+                if (document.documentElement.scrollTop == 0){
+                    document.documentElement.scrollTo({
+                        top: 80,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+            if (mainContainer.scrollTop == 0 && e.deltaY < 0){
+                e.preventDefault()
+                e.stopPropagation()
+                if (document.documentElement.scrollTop == 80){
+                    document.documentElement.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
     },
     methods: {
         toMyApps() {
@@ -74,6 +98,21 @@ export default {
 .container-main {
     background: #f4f4f4;
     padding: 0 16rem 2rem 16rem;
+    scroll-behavior: smooth;
+}
+.container-main::-webkit-scrollbar {
+    width: 8px;
+    z-index: 10;
+}
+.container-main::-webkit-scrollbar-track-piece {
+    background: darken(#fff, 5%);
+}
+.container-main::-webkit-scrollbar-thumb {
+    border-radius: 9px;
+    background-color: darken(#fff, 15%);
+}
+.container-main::-webkit-scrollbar-button {
+    display: none;
 }
 .header{
     padding: 0 16rem;
@@ -138,5 +177,10 @@ export default {
 }
 .v-leave-active {
     transition: 50ms;
+}
+</style>
+<style lang="less">
+html::-webkit-scrollbar{
+    display: none;
 }
 </style>
