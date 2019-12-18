@@ -313,6 +313,9 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.row-applist > .el-col {
+    margin-bottom: 16px;
+}
 .row-applist-title {
     margin: 12px 0;
     font-size: 18px;

@@ -86,6 +86,11 @@ export default {
     height: @card-app-icon-width;
     margin: 28.5px 10px 28.5px 28px;
 }
+@media (max-width: 1600px){
+    .card-app > .el-card__body > .icon-wrapper {
+        margin: 30px 4px 28.5px 22px;
+    }
+}
 .card-app > .el-card__body > .icon-wrapper > img {
     width: @card-app-icon-width;
     height: @card-app-icon-width;

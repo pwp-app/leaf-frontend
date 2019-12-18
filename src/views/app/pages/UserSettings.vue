@@ -422,7 +422,7 @@ export default {
     margin-bottom: 8px;
 }
 .avatar-desc-action {
-    margin-top: 60px;
+    margin-top: 56px;
     margin-left: 48px;
 }
 #form-avatar > .el-form-item > .el-form-item__content {

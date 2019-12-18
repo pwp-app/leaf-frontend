@@ -109,7 +109,7 @@ export default {
             }).then((response) => {
                 this.pageLoading = false
                 if (response.status == 200 && response.data.code == 406){
-                    this.linkAvaliable = false
+                    //this.linkAvaliable = false
                     return
                 }
                 if (response.status != 200 || response.data.code != 200){
