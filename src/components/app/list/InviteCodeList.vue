@@ -2,11 +2,11 @@
     <div class="table-wrapper">
         <el-table :data="data" style="width: 100%" v-loading="tableLoading">
             <el-table-column prop="id" label="ID" width="100"></el-table-column>
-            <el-table-column prop="phone" label="申请人"></el-table-column>
+            <el-table-column prop="createUid" label="申请人"></el-table-column>
             <el-table-column prop="createTime" label="创建时间" width="180"></el-table-column>
             <el-table-column prop="code" label="邀请码"></el-table-column>
-            <el-table-column prop="email" label="使用状态"></el-table-column>
-            <el-table-column prop="phone" label="使用人"></el-table-column>
+            <el-table-column prop="used" label="使用状态" :formatter="usedFormatter"></el-table-column>
+            <el-table-column prop="usedUid" label="使用人" :formatter="usedIdFormatter"></el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
                     <div class="table-icon-button">
@@ -79,6 +79,20 @@ export default {
                     this.getList()
                 })
             });
+        },
+        usedFormatter(row, column, cellValue, index){
+            if (cellValue){
+                return '已使用'
+            } else {
+                return '未使用'
+            }
+        },
+        usedIdFormatter(row, column, cellValue, index){
+            if (cellValue){
+                return cellValue
+            } else {
+                return '无'
+            }
         }
     }
 }
