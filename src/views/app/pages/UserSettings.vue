@@ -125,7 +125,7 @@
             title="修改密码"
             :visible.sync="modPasswordDialogVisible"
             width="30%">
-            <el-form ref="changePasswordForm" :model="modPasswordForm" :rules="modPasswordFormRule">
+            <el-form ref="modPasswordForm" :model="modPasswordForm" :rules="modPasswordFormRule">
                 <el-form-item prop="oldPassword" label="旧密码">
                     <el-input type="password" v-model="modPasswordForm.oldPassword"></el-input>
                 </el-form-item>
@@ -133,7 +133,7 @@
                     <el-input type="password" v-model="modPasswordForm.newPassword"></el-input>
                 </el-form-item>
                 <el-form-item prop="newConfirmPassword" label="确认密码">
-                    <el-input type="password" v-model="modPasswordForm.confirmPassword"></el-input>
+                    <el-input type="password" v-model="modPasswordForm.newConfirmPassword"></el-input>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -316,7 +316,7 @@ export default {
                 this.axios.post('/api/user/modPassword', {
                     oldPassword: this.modPasswordForm.oldPassword,
                     newPassword: this.modPasswordForm.newPassword,
-                    newConfirmPassword: this.modPasswordForm,newConfirmPassword
+                    newConfirmPassword: this.modPasswordForm.newConfirmPassword
                 }).then((response) => {
                     this.submitModPasswordEnabled = true
                     if (response.status != 200){
@@ -328,7 +328,7 @@ export default {
                         this.clearModPasswordForm();
                         this.modPasswordDialogVisible = false;
                     } else {
-                        this.$message.success(response.data.message)
+                        this.$message.error(response.data.message)
                     }
                 })
             })
